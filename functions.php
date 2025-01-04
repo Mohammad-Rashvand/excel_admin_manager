@@ -13,6 +13,8 @@ add_action('init', 'start_session', 1);
 
 // بارگذاری استایل‌ها و اسکریپت‌ها
 function custom_login_scripts() {
+        // بارگذاری کتابخانه‌های jQuery، Handsontable و SheetJS
+    wp_enqueue_script('jquery');
     wp_enqueue_style('custom-login-style', get_template_directory_uri() . '/styles.css');
     wp_enqueue_script('script-js', get_template_directory_uri() . '/scripts.js', array(), '', true);
     wp_enqueue_style('bootstrap-css', 'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css');
@@ -21,6 +23,8 @@ function custom_login_scripts() {
     wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js', array(), '', true);
     wp_enqueue_style('handsontable-css', 'https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css');
     wp_enqueue_script('handsontable-js', 'https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js', array(), '', true);
+
+
 }
 add_action('wp_enqueue_scripts', 'custom_login_scripts');
 
@@ -85,6 +89,7 @@ function upload_new_excel_file() {
     }
 }
 
+
 // ذخیره فایل اکسل ویرایش‌شده
 add_action('admin_post_save_edited_excel_file', 'save_edited_excel_file');
 function save_edited_excel_file() {
@@ -103,19 +108,30 @@ function save_edited_excel_file() {
             $file_url = $movefile['url'];
             $file_path = $movefile['file'];
 
-            wp_update_post(array(
+            $post_update = wp_update_post(array(
                 'ID' => $file_id,
                 'post_content' => $file_url,
             ));
 
-            update_post_meta($file_id, '_excel_file_path', $file_path);
+            if (is_wp_error($post_update)) {
+                wp_die('Failed to update post: ' . $post_update->get_error_message());
+            }
+
+            $meta_update = update_post_meta($file_id, '_excel_file_path', $file_path);
+            if (!$meta_update) {
+                wp_die('Failed to update post meta.');
+            }
+
             wp_redirect(site_url('/admin-panel'));
             exit;
         } else {
-            wp_die($movefile['error']);
+            wp_die('Upload error: ' . $movefile['error']);
         }
+    } else {
+        wp_die('Invalid request.');
     }
 }
+
 
 // نمایش فایل‌های اکسل در پنل مدیریت
 function list_excel_files() {
@@ -143,7 +159,7 @@ function list_excel_files() {
 
         $assigned_user_name = ($assigned_user === 'all') ? 'همه کاربران' : get_userdata($assigned_user)->display_name;
 
-        echo "<tr><td>" . get_the_title() . "</td><td>" . $assigned_user_name . "</td><td>" . $last_modified_persian . "</td><td><a href='" . add_query_arg('file_id', get_the_ID(), site_url('/admin-panel')) . "' class='btn btn-primary'>مشاهده و ویرایش</a> <a href='" . esc_url($file_url) . "' class='btn btn-secondary' download>دانلود</a> <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger'>حذف</a></td></tr>";
+        echo "<tr><td>" . get_the_title() . "</td><td>" . $assigned_user_name . "</td><td>" . $last_modified_persian . "</td><td><a href='" . add_query_arg('file_id', get_the_ID(), site_url('/admin-panel')) . "#view-excel' class='btn btn-primary'>مشاهده و ویرایش</a> <a href='" . esc_url($file_url) . "' class='btn btn-secondary' download>دانلود</a> <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger' onclick='return confirm(\"آیا مطمئن هستید؟\")'>حذف</a></td></tr>";
     }
 
     echo "</tbody></table></div>";

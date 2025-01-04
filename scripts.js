@@ -3,6 +3,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileUrl = saveBtn ? saveBtn.dataset.fileUrl : null;
     let workbooks = [], hotInstances = [], headersArray = [];
 
+    // ثبت زبان فارسی در Handsontable
+    Handsontable.languages.registerLanguageDictionary({
+        languageCode: 'fa-IR',
+        languageDirection: 'rtl',
+        translations: {
+            'Cancel': 'لغو',
+            'Remove row': 'حذف ردیف',
+            'Insert row above': 'درج ردیف بالا',
+            'Insert row below': 'درج ردیف پایین',
+            'Undo': 'واگرد',
+            'Redo': 'بازگرد',
+            'Read-only': 'فقط خواندنی',
+            'Alignment': 'تراز',
+            'Insert column left': 'درج ستون چپ',
+            'Insert column right': 'درج ستون راست',
+            'Clear column': 'پاک کردن ستون',
+            'Sort ascending': 'مرتب‌سازی صعودی',
+            'Sort descending': 'مرتب‌سازی نزولی'
+            // سایر ترجمه‌ها
+        }
+    });
+
     const fetchExcelFile = async (url) => {
         try {
             const response = await fetch(url);
@@ -76,9 +98,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = new FormData();
         form.append('file', blob);
         form.append('file_id', saveBtn.dataset.fileId);
-        await fetch(saveBtn.dataset.uploadUrl, { method: 'POST', body: form });
-        location.reload();
+        try {
+            const response = await fetch(saveBtn.dataset.uploadUrl, { method: 'POST', body: form });
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            location.reload();
+        } catch (error) {
+            console.error('Error saving the edited file:', error);
+            document.getElementById('loading').style.display = 'none';
+        }
     };
+
 
     if (fileUrl) fetchExcelFile(fileUrl);
     if (saveBtn) saveBtn.addEventListener('click', saveEditedFile);
@@ -88,9 +117,12 @@ document.addEventListener('DOMContentLoaded', () => {
         initialValue: false
     });
 
-    document.getElementById('selectAll').addEventListener('change', function () {
-        document.querySelectorAll('.fileCheckbox').forEach(checkbox => checkbox.checked = this.checked);
-    });
+    const selectAllCheckbox = document.getElementById('selectAll');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            document.querySelectorAll('.fileCheckbox').forEach(checkbox => checkbox.checked = this.checked);
+        });
+    }
 
     window.performSearch = () => {
         const searchName = document.getElementById('searchName').value.toLowerCase();
@@ -108,8 +140,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = new FormData();
         form.append('action', 'bulk_delete_files');
         form.append('file_ids', JSON.stringify(fileIds));
-        await fetch(saveBtn.dataset.bulkDeleteUrl, { method: 'POST', body: form });
-        location.reload();
+        try {
+            const response = await fetch(saveBtn.dataset.bulkDeleteUrl, { method: 'POST', body: form });
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            location.reload();
+        } catch (error) {
+            console.error('Error deleting files:', error);
+        }
     };
 
     document.querySelectorAll('.duration').forEach(timer => {
@@ -132,19 +169,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    document.getElementById('search-input').addEventListener('keyup', function () {
-        const filter = this.value.toLowerCase();
-        document.querySelectorAll('.employee-card').forEach(card => {
-            card.style.display = card.getAttribute('data-name').toLowerCase().includes(filter) ? '' : 'none';
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            document.querySelectorAll('.employee-card').forEach(card => {
+                card.style.display = card.getAttribute('data-name').toLowerCase().includes(filter) ? '' : 'none';
+            });
         });
-    });
+    }
 
-    document.getElementById('log-search-input').addEventListener('keyup', function () {
-        const filter = this.value.toLowerCase();
-        document.querySelectorAll('.table-report tbody tr').forEach(row => {
-            row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+    const logSearchInput = document.getElementById('log-search-input');
+    if (logSearchInput) {
+        logSearchInput.addEventListener('keyup', function () {
+            const filter = this.value.toLowerCase();
+            document.querySelectorAll('.table-report tbody tr').forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(filter) ? '' : 'none';
+            });
         });
-    });
+    }
 
     const loginForm = document.getElementById('login-form');
     if (loginForm) {

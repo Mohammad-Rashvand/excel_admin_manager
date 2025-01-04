@@ -8,11 +8,7 @@ if (!is_user_logged_in() || !current_user_can('manage_options')) {
     exit;
 }
 
-// بارگذاری کتابخانه‌های jQuery، Handsontable و SheetJS
-wp_enqueue_script('jquery');
-wp_enqueue_script('handsontable', 'https://cdn.jsdelivr.net/npm/handsontable@10.0.0/dist/handsontable.full.min.js', array(), null, true);
-wp_enqueue_style('handsontable', 'https://cdn.jsdelivr.net/npm/handsontable@10.0.0/dist/handsontable.full.min.css');
-wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', array(), null, true);
+
 
 ?>
 
@@ -23,10 +19,10 @@ wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xl
     </div>
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         <li class="nav-item">
-            <a class="nav-link <?php echo !isset($_GET['file_id']) ? 'active' : ''; ?>" id="excel-tab" data-toggle="tab" href="#excel" role="tab" aria-controls="excel" aria-selected="<?php echo !isset($_GET['file_id']) ? 'true' : 'false'; ?>">مدیریت فایل‌های اکسل</a>
+            <a class="nav-link <?php echo !isset($_GET['file_id']) ? 'active' : ''; ?>" id="excel-tab" data-toggle="tab" href="#excel" role="tab" aria-controls="excel" aria-selected="<?php echo !isset($_GET['file_id']) ? 'true' : 'false'; ?>">فایل‌های اکسل</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link <?php echo isset($_GET['file_id']) ? 'active' : ''; ?>" id="view-tab" data-toggle="tab" href="#view-excel" role="tab" aria-controls="view-excel" aria-selected="<?php echo isset($_GET['file_id']) ? 'true' : 'false'; ?>">مشاهده و ویرایش فایل</a>
+            <a class="nav-link <?php echo isset($_GET['file_id']) ? 'active' : ''; ?>" id="view-tab" data-toggle="tab" href="#view-excel" role="tab" aria-controls="view-excel" aria-selected="<?php echo isset($_GET['file_id']) ? 'true' : 'false'; ?>">مشاهده فایل</a>
         </li>
     </ul>
     <div class="tab-content" id="myTabContent">
@@ -40,7 +36,7 @@ wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xl
                             </div>
                             <div class="card-body">
                                 <form action="<?php echo admin_url('admin-post.php'); ?>" method="post" enctype="multipart/form-data">
-                                    <input type="hidden" name="action" value="handle_file_upload">
+                                    <input type="hidden" name="action" value="upload_new_excel_file">
                                     <div class="form-group">
                                         <label for="excel_file">انتخاب فایل اکسل:</label>
                                         <input type="file" name="excel_file" id="excel_file" class="form-control" required>
@@ -116,7 +112,7 @@ wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xl
                             echo "<td>
                                     <a href='" . add_query_arg('file_id', get_the_ID(), site_url('/admin-panel')) . "#view-excel' class='btn btn-primary'>مشاهده و ویرایش</a> 
                                     <a href='" . esc_url($file_url) . "' class='btn btn-secondary' download>دانلود</a> 
-                                    <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger' onclick='return confirm(\"آیا مطمئن هستید که می‌خواهید این فایل را حذف کنید؟\")'>حذف</a>
+                                    <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger' onclick='return confirm(\"آیا مطمئن هستید؟\")'>حذف</a>
                                   </td>";
                             echo "</tr>";
                         }
@@ -141,7 +137,7 @@ wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xl
                 <div class="container-fluid mt-5 text-right" dir="rtl">
                     <div class="content">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <button id="saveBtn" class="btn btn-success" data-file-url="<?php echo esc_url($file_url); ?>" data-file-id="<?php echo esc_attr($file_id); ?>" data-upload-url="<?php echo esc_url(admin_url('admin-post.php?action=save_excel_file')); ?>">ذخیره</button>
+                            <button id="saveBtn" class="btn btn-success" data-file-url="<?php echo esc_url($file_url); ?>" data-file-id="<?php echo esc_attr($file_id); ?>" data-upload-url="<?php echo admin_url('admin-post.php?action=save_edited_excel_file'); ?>">ذخیره</button>
                             <a href="<?php echo esc_url(site_url('/admin-panel')); ?>" class="btn btn-secondary">بازگشت به لیست فایل‌ها</a>
                         </div>
                         <div id="sheetTabs" class="mb-3"></div>
