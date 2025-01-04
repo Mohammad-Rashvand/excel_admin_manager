@@ -20,7 +20,7 @@ if (isset($_GET['file_id'])) {
         </div>
         <div class="content">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <button id="saveBtn" class="btn btn-success" data-file-url="<?php echo esc_url($file_url); ?>" data-file-id="<?php echo esc_attr($file_id); ?>" data-upload-url="<?php echo esc_url(admin_url('admin-post.php?action=save_edited_file')); ?>">ذخیره</button>
+                <button id="saveBtn" class="btn btn-success" data-file-url="<?php echo esc_url($file_url); ?>" data-file-id="<?php echo esc_attr($file_id); ?>" data-upload-url="<?php echo esc_url(admin_url('admin-post.php?action=save_excel_file')); ?>">ذخیره</button>
                 <a href="<?php echo esc_url(site_url('/admin-panel')); ?>" class="btn btn-secondary">بازگشت به لیست فایل‌ها</a>
             </div>
             <div id="excelTable" class="handsontable-container" style="width: 100%; height: 600px; overflow-x: auto;"></div>
@@ -78,24 +78,6 @@ if (isset($_GET['file_id'])) {
                     <div class="card-body">
                         <p>تعداد کل کارکنان: <?php echo count(get_users()); ?></p>
                         <p>تعداد کل فایل‌های اکسل: <?php echo wp_count_posts('excel_file')->publish; ?></p>
-                        <p>تعداد کل ورود و خروج‌های روز جاری: 
-                            <?php
-                            $today = date('Y-m-d');
-                            $args = array(
-                                'post_type' => 'entry_exit',
-                                'date_query' => array(
-                                    array(
-                                        'after' => $today,
-                                        'before' => $today . ' 23:59:59',
-                                        'inclusive' => true,
-                                    ),
-                                ),
-                                'posts_per_page' => -1,
-                            );
-                            $entry_exit_posts = new WP_Query($args);
-                            echo $entry_exit_posts->found_posts;
-                            ?>
-                        </p>
                     </div>
                 </div>
             </div>
@@ -103,9 +85,6 @@ if (isset($_GET['file_id'])) {
         <ul class="nav nav-tabs" id="myTab" role="tablist">
             <li class="nav-item">
                 <a class="nav-link active" id="excel-tab" data-toggle="tab" href="#excel" role="tab" aria-controls="excel" aria-selected="true">مدیریت فایل‌های اکسل</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="entry-exit-tab" data-toggle="tab" href="#entry-exit" role="tab" aria-controls="entry-exit" aria-selected="false">مدیریت ورود و خروج</a>
             </li>
         </ul>
         <div class="tab-content" id="myTabContent">
@@ -153,7 +132,7 @@ if (isset($_GET['file_id'])) {
                                 echo "<td>
                                         <a href='" . add_query_arg('file_id', get_the_ID(), site_url('/admin-panel')) . "' class='btn btn-primary'>مشاهده و ویرایش</a> 
                                         <a href='" . esc_url($file_url) . "' class='btn btn-secondary' download>دانلود</a> 
-                                        <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger'>حذف</a>
+                                        <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger' onclick='return confirm(\"آیا مطمئن هستید که می‌خواهید این فایل را حذف کنید؟\")'>حذف</a>
                                       </td>";
                                 echo "</tr>";
                             }
@@ -166,17 +145,6 @@ if (isset($_GET['file_id'])) {
                     <!-- دکمه حذف دسته‌جمعی -->
                     <div class="d-flex justify-content-end">
                         <button class="btn btn-danger" onclick="bulkDelete()">حذف دسته‌جمعی</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tab-pane fade" id="entry-exit" role="tabpanel" aria-labelledby="entry-exit-tab">
-                <div class="content">
-                    <h2>مدیریت ورود و خروج</h2>
-                    <button class="btn btn-success mb-3" id="download-excel">دانلود لاگ به صورت اکسل</button>
-                    <input type="text" id="entryExitSearch" class="form-control mb-3" placeholder="جستجوی نام کارمند یا تاریخ">
-                    <div class="table-responsive">
-                        <div id="entryExitTableBody" class="handsontable-container" style="width: 100%; height: 600px; overflow-x: auto;"></div>
                     </div>
                 </div>
             </div>
