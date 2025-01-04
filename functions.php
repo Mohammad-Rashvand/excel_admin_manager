@@ -142,7 +142,7 @@ function list_excel_files() {
 
         $assigned_user_name = ($assigned_user === 'all') ? 'همه کاربران' : get_userdata($assigned_user)->display_name;
 
-        echo "<tr><td>" . get_the_title() . "</td><td>" . $assigned_user_name . "</td><td>" . $last_modified_persian . "</td><td><a href='" . add_query_arg('file_id', get_the_ID(), site_url('/admin-panel')) . "' class='btn btn-primary'>مشاهده و ویرایش</a> <a href='" . $file_url . "' class='btn btn-secondary' download>دانلود</a> <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger'>حذف</a></td></tr>";
+        echo "<tr><td>" . get_the_title() . "</td><td>" . $assigned_user_name . "</td><td>" . $last_modified_persian . "</td><td><a href='" . add_query_arg('file_id', get_the_ID(), site_url('/admin-panel')) . "' class='btn btn-primary'>مشاهده و ویرایش</a> <a href='" . esc_url($file_url) . "' class='btn btn-secondary' download>دانلود</a> <a href='" . wp_nonce_url(admin_url('admin-post.php?action=delete_file&delete_file=' . get_the_ID()), 'delete_file_' . get_the_ID()) . "' class='btn btn-danger'>حذف</a></td></tr>";
     }
 
     echo "</tbody></table></div>";
@@ -416,4 +416,3 @@ require get_template_directory() . '/inc/ap-lite-woocommerce-function.php';
 require get_template_directory() . '/welcome/welcome.php';
 
 add_filter('widget_text', 'do_shortcode');
-?>
