@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const saveBtn = document.getElementById('saveBtn');
-    const fileUrl = saveBtn?.dataset?.fileUrl;
+    const fileUrl = saveBtn ? saveBtn.dataset.fileUrl : null;
     let workbooks = [], hotInstances = [], headersArray = [];
 
     const fetchExcelFile = async (url) => {
@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createSheetTabs = () => {
         const sheetTabs = document.getElementById('sheetTabs');
+        if (!sheetTabs) return;
+        sheetTabs.innerHTML = ''; // Clear any existing tabs
         workbooks.forEach((sheet, index) => {
             const tab = document.createElement('button');
             tab.className = 'btn btn-primary mx-1';
@@ -34,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loadSheet = (index) => {
         const container = document.getElementById('excelTable');
+        if (!container) return;
         if (hotInstances[index]) hotInstances[index].destroy();
         hotInstances[index] = new Handsontable(container, {
             data: workbooks[index].data,
@@ -78,9 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     if (fileUrl) fetchExcelFile(fileUrl);
-    saveBtn?.addEventListener('click', saveEditedFile);
+    if (saveBtn) saveBtn.addEventListener('click', saveEditedFile);
 
-    $('#searchDate').persianDatepicker({
+    jQuery('#searchDate').persianDatepicker({
         format: 'YYYY/MM/DD',
         initialValue: false
     });

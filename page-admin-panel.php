@@ -8,7 +8,8 @@ if (!is_user_logged_in() || !current_user_can('manage_options')) {
     exit;
 }
 
-// بارگذاری کتابخانه‌های Handsontable و SheetJS
+// بارگذاری کتابخانه‌های jQuery، Handsontable و SheetJS
+wp_enqueue_script('jquery');
 wp_enqueue_script('handsontable', 'https://cdn.jsdelivr.net/npm/handsontable@10.0.0/dist/handsontable.full.min.js', array(), null, true);
 wp_enqueue_style('handsontable', 'https://cdn.jsdelivr.net/npm/handsontable@10.0.0/dist/handsontable.full.min.css');
 wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js', array(), null, true);
@@ -143,6 +144,7 @@ wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xl
                             <button id="saveBtn" class="btn btn-success" data-file-url="<?php echo esc_url($file_url); ?>" data-file-id="<?php echo esc_attr($file_id); ?>" data-upload-url="<?php echo esc_url(admin_url('admin-post.php?action=save_excel_file')); ?>">ذخیره</button>
                             <a href="<?php echo esc_url(site_url('/admin-panel')); ?>" class="btn btn-secondary">بازگشت به لیست فایل‌ها</a>
                         </div>
+                        <div id="sheetTabs" class="mb-3"></div>
                         <div id="excelTable" class="handsontable-container" style="width: 100%; height: 600px; overflow-x: auto;"></div>
                         <!-- حالت لودینگ -->
                         <div id="loading" class="loading" style="display: none;">
