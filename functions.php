@@ -47,9 +47,9 @@ function custom_logout_shortcode() {
 }
 add_shortcode('custom_logout', 'custom_logout_shortcode');
 
-// ذخیره فایل اکسل ویرایش‌شده
-add_action('admin_post_handle_file_upload', 'handle_file_upload');
-function handle_file_upload() {
+// ذخیره فایل اکسل جدید
+add_action('admin_post_upload_new_excel_file', 'upload_new_excel_file');
+function upload_new_excel_file() {
     if (!is_user_logged_in() || !current_user_can('manage_options')) {
         wp_die('Permission denied');
     }
@@ -85,8 +85,9 @@ function handle_file_upload() {
     }
 }
 
-add_action('admin_post_handle_file_uploadd', 'handle_file_uploadd');
-function handle_file_uploadd() {
+// ذخیره فایل اکسل ویرایش‌شده
+add_action('admin_post_save_edited_excel_file', 'save_edited_excel_file');
+function save_edited_excel_file() {
     if (!is_user_logged_in() || !current_user_can('manage_options')) {
         wp_die('Permission denied');
     }
