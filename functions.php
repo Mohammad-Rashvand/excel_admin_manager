@@ -14,17 +14,16 @@ add_action('init', 'start_session', 1);
 // بارگذاری استایل‌ها و اسکریپت‌ها
 function custom_login_scripts() {
         // بارگذاری کتابخانه‌های jQuery، Handsontable و SheetJS
-    wp_enqueue_script('jquery');
+  wp_enqueue_script('jquery', 'https://code.jquery.com/jquery-3.6.0.min.js', array(), '3.6.0', true);
     wp_enqueue_style('custom-login-style', get_template_directory_uri() . '/styles.css');
     wp_enqueue_script('script-js', get_template_directory_uri() . '/scripts.js', array(), '', true);
     wp_enqueue_style('bootstrap-css', 'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css');
     wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css');
     wp_enqueue_script('bootstrap-js', 'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js', array('jquery'), '', true);
-    wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js', array(), '', true);
-    wp_enqueue_style('handsontable-css', 'https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css');
-    wp_enqueue_script('handsontable-js', 'https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js', array(), '', true);
-    wp_enqueue_style('persian-datepicker-css', 'https://cdnjs.cloudflare.com/ajax/libs/persian-datepicker/1.0.0/persian-datepicker.min.css');
-    wp_enqueue_script('persian-datepicker-js', 'https://cdnjs.cloudflare.com/ajax/libs/persian-datepicker/1.0.0/persian-datepicker.min.js', array('jquery'), null, true);
+    wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js', array(), '', true);
+    wp_enqueue_style('handsontable-css', 'https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.css');
+    wp_enqueue_script('handsontable-js', 'https://cdn.jsdelivr.net/npm/handsontable@12.1.0/dist/handsontable.full.min.js', array(), '', true);
+
 }
 add_action('wp_enqueue_scripts', 'custom_login_scripts');
 
@@ -50,6 +49,87 @@ function custom_logout_shortcode() {
     }
 }
 add_shortcode('custom_logout', 'custom_logout_shortcode');
+
+
+// ذخیره فایل اکسل ویرایش‌شده توسط کاربر
+add_action('admin_post_nopriv_handle_user_file_upload', 'handle_user_file_upload');
+add_action('admin_post_handle_user_file_upload', 'handle_user_file_upload');
+function handle_user_file_upload() {
+    if (!is_user_logged_in()) {
+        wp_die('Permission denied');
+    }
+
+    if (isset($_FILES['file']) && isset($_POST['file_id'])) {
+        $file_id = intval($_POST['file_id']);
+        $uploadedfile = $_FILES['file'];
+        $upload_overrides = array('test_form' => false);
+
+        $movefile = wp_handle_upload($uploadedfile, $upload_overrides);
+
+        if ($movefile && !isset($movefile['error'])) {
+            $file_url = $movefile['url'];
+            $file_path = $movefile['file'];
+
+            // به‌روزرسانی پست
+            wp_update_post(array(
+                'ID' => $file_id,
+                'post_content' => $file_url,
+            ));
+
+            // به‌روزرسانی متای پست
+            update_post_meta($file_id, '_excel_file_path', $file_path);
+
+            // بازگشت به پنل کاربری
+            wp_redirect(site_url('/user-panel'));
+            exit;
+        } else {
+            wp_die('Upload error: ' . $movefile['error']);
+        }
+    } else {
+        wp_die('Invalid request.');
+    }
+}
+
+
+// ذخیره فایل اکسل ویرایش‌شده توسط ادمین
+add_action('admin_post_nopriv_handle_admin_file_upload', 'handle_admin_file_upload');
+add_action('admin_post_handle_admin_file_upload', 'handle_admin_file_upload');
+function handle_admin_file_upload() {
+    if (!is_user_logged_in() || !current_user_can('manage_options')) {
+        wp_die('Permission denied');
+    }
+
+    if (isset($_FILES['file']) && isset($_POST['file_id'])) {
+        $file_id = intval($_POST['file_id']);
+        $uploadedfile = $_FILES['file'];
+        $upload_overrides = array('test_form' => false);
+
+        $movefile = wp_handle_upload($uploadedfile, $upload_overrides);
+
+        if ($movefile && !isset($movefile['error'])) {
+            $file_url = $movefile['url'];
+            $file_path = $movefile['file'];
+
+            // به‌روزرسانی پست
+            wp_update_post(array(
+                'ID' => $file_id,
+                'post_content' => $file_url,
+            ));
+
+            // به‌روزرسانی متای پست
+            update_post_meta($file_id, '_excel_file_path', $file_path);
+
+            // بازگشت به پنل کاربری
+            wp_redirect(site_url('/admin-panel'));
+            exit;
+        } else {
+            wp_die('Upload error: ' . $movefile['error']);
+        }
+    } else {
+        wp_die('Invalid request.');
+    }
+}
+
 
 // ذخیره فایل اکسل جدید
 add_action('admin_post_upload_new_excel_file', 'upload_new_excel_file');
@@ -86,41 +166,6 @@ function upload_new_excel_file() {
         } else {
             wp_die($movefile['error']);
         }
-    }
-}
-
-
-add_action('admin_post_save_edited_excel_file', 'save_edited_excel_file');
-function save_edited_excel_file() {
-    if (!is_user_logged_in() || !current_user_can('manage_options')) {
-        wp_die('Permission denied');
-    }
-
-    if (isset($_FILES['file']) && isset($_POST['file_id'])) {
-        $file_id = intval($_POST['file_id']);
-        $uploadedfile = $_FILES['file'];
-        $upload_overrides = array('test_form' => false);
-
-        $movefile = wp_handle_upload($uploadedfile, $upload_overrides);
-
-        if ($movefile && !isset($movefile['error'])) {
-            $file_url = $movefile['url'];
-            $file_path = $movefile['file'];
-
-            wp_update_post(array(
-                'ID' => $file_id,
-                'post_content' => $file_url,
-            ));
-
-            update_post_meta($file_id, '_excel_file_path', $file_path);
-            
-            wp_redirect(site_url('/admin-panel'));
-            exit;
-        } else {
-            wp_die('Upload error: ' . $movefile['error']);
-        }
-    } else {
-        wp_die('Invalid request.');
     }
 }
 

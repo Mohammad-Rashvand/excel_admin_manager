@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
             'Clear column': 'پاک کردن ستون',
             'Sort ascending': 'مرتب‌سازی صعودی',
             'Sort descending': 'مرتب‌سازی نزولی'
-            // سایر ترجمه‌ها
         }
     });
 
@@ -86,36 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const saveEditedFile = () => {
-        document.getElementById('loading').style.display = 'block';
-        const newWorkbook = XLSX.utils.book_new();
-        workbooks.forEach((sheet, index) => {
-            const hotInstance = hotInstances[index];
-            const newData = hotInstance ? hotInstance.getData() : sheet.data;
-            newData.unshift(headersArray[index]);
-            XLSX.utils.book_append_sheet(newWorkbook, XLSX.utils.aoa_to_sheet(newData), sheet.name);
-        });
-        const blob = new Blob([XLSX.write(newWorkbook, { bookType: 'xlsx', type: 'array' })], { type: "application/octet-stream" });
-        const form = new FormData();
-        form.append('file', blob);
-        form.append('file_id', saveBtn.dataset.fileId);
 
-        fetch(saveBtn.dataset.uploadUrl, {
-            method: 'POST',
-            body: form
-        })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                location.reload();
-            })
-            .catch(error => {
-                console.error('Error saving the edited file:', error);
-                document.getElementById('loading').style.display = 'none';
-            });
-    };
 
     if (fileUrl) fetchExcelFile(fileUrl);
-    if (saveBtn) saveBtn.addEventListener('click', saveEditedFile);
+
 
     const selectAllCheckbox = document.getElementById('selectAll');
     if (selectAllCheckbox) {

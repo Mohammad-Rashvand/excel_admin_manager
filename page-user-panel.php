@@ -23,14 +23,6 @@ if (isset($_GET['file_id'])) {
                 <a href="<?php echo site_url('/user-panel'); ?>" class="btn btn-secondary">بازگشت به لیست فایل‌ها</a>
             </div>
             <div id="sheetTabs" class="mb-3"></div>
-            <div id="toolbar" class="mb-3">
-                <!-- امکانات مربوط به فایل اکسل -->
-                <button class="btn btn-primary" onclick="toggleContextMenu()">فعال کردن منوی راست کلیک</button>
-                <button class="btn btn-primary" onclick="autoSizeColumns()">تنظیم عرض ستون‌ها</button>
-                <button class="btn btn-primary" onclick="toggleWordWrap()">فعال کردن Wrap Text</button>
-                <button class="btn btn-primary" onclick="addRow()">اضافه کردن ردیف</button>
-                <button class="btn btn-primary" onclick="addColumn()">اضافه کردن ستون</button>
-            </div>
             <div id="excelTable" class="handsontable-container" style="width: 100%; height: 600px; overflow-x: auto;"></div>
             <!-- حالت لودینگ -->
             <div id="loading" class="loading" style="display: none;">
@@ -199,7 +191,9 @@ if (isset($_GET['file_id'])) {
             hotInstances[currentSheetIndex].alter('insert_col');
         }
 
-        document.getElementById('saveBtn').addEventListener('click', function () {
+       
+        
+ document.getElementById('saveBtn').addEventListener('click', function () {
             // نمایش حالت لودینگ
             document.getElementById('loading').style.display = 'block';
 
@@ -219,7 +213,7 @@ if (isset($_GET['file_id'])) {
             formData.append('file', new Blob([wbout], { type: "application/octet-stream" }), 'edited_file.xlsx');
             formData.append('file_id', <?php echo $file_id; ?>);
 
-            fetch('<?php echo admin_url('admin-post.php?action=handle_file_uploadd'); ?>', {
+            fetch('<?php echo admin_url('admin-post.php?action=handle_user_file_upload'); ?>', {
                 method: 'POST',
                 body: formData
             }).then(response => {
@@ -236,6 +230,9 @@ if (isset($_GET['file_id'])) {
                 document.getElementById('loading').style.display = 'none';
             });
         });
+
+
+
     </script>
 
     <?php
