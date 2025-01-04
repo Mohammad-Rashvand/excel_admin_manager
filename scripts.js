@@ -108,14 +108,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-
     if (fileUrl) fetchExcelFile(fileUrl);
     if (saveBtn) saveBtn.addEventListener('click', saveEditedFile);
 
-    jQuery('#searchDate').persianDatepicker({
-        format: 'YYYY/MM/DD',
-        initialValue: false
-    });
+    // اطمینان از اینکه پلاگین persianDatepicker بارگذاری شده است
+    if (typeof jQuery.fn.persianDatepicker !== 'undefined') {
+        jQuery('#searchDate').persianDatepicker({
+            format: 'YYYY/MM/DD',
+            initialValue: false
+        });
+    } else {
+        console.error('persianDatepicker is not loaded');
+    }
 
     const selectAllCheckbox = document.getElementById('selectAll');
     if (selectAllCheckbox) {

@@ -23,8 +23,8 @@ function custom_login_scripts() {
     wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js', array(), '', true);
     wp_enqueue_style('handsontable-css', 'https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css');
     wp_enqueue_script('handsontable-js', 'https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js', array(), '', true);
-
-
+    wp_enqueue_style('persian-datepicker-css', 'https://cdnjs.cloudflare.com/ajax/libs/persian-datepicker/1.0.0/persian-datepicker.min.css');
+    wp_enqueue_script('persian-datepicker-js', 'https://cdnjs.cloudflare.com/ajax/libs/persian-datepicker/1.0.0/persian-datepicker.min.js', array('jquery'), null, true);
 }
 add_action('wp_enqueue_scripts', 'custom_login_scripts');
 
