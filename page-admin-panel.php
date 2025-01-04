@@ -8,6 +8,11 @@ if (!is_user_logged_in() || !current_user_can('manage_options')) {
     exit;
 }
 
+// بارگذاری کتابخانه‌های Handsontable و SheetJS
+wp_enqueue_script('handsontable', 'https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.js', array(), null, true);
+wp_enqueue_style('handsontable', 'https://cdn.jsdelivr.net/npm/handsontable@8.4.0/dist/handsontable.full.min.css');
+wp_enqueue_script('xlsx', 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js', array(), null, true);
+
 // نمایش و ویرایش فایل اکسل
 if (isset($_GET['file_id'])) {
     $file_id = intval($_GET['file_id']);
