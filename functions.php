@@ -230,7 +230,7 @@ if (!function_exists('register_entry_exit_post_type')) {
             'view_item' => 'مشاهده ورود و خروج',
             'all_items' => 'همه ورود و خروج‌ها',
             'search_items' => 'جستجوی ورود و خروج',
-            'not_found' => 'ورود و خروجی یافت نشد.',
+            'not_found' => 'ورودی و خروجی یافت نشد.',
         );
 
         $args = array(
