@@ -20,7 +20,7 @@ if (isset($_GET['file_id'])) {
         </div>
         <div class="content">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <button id="saveBtn" class="btn btn-success" data-file-url="<?php echo esc_url($file_url); ?>" data-file-id="<?php echo esc_attr($file_id); ?>" data-upload-url="<?php echo esc_url(admin_url('admin-post.php?action=handle_file_uploadd')); ?>">ذخیره</button>
+                <button id="saveBtn" class="btn btn-success" data-file-url="<?php echo esc_url($file_url); ?>" data-file-id="<?php echo esc_attr($file_id); ?>" data-upload-url="<?php echo esc_url(admin_url('admin-post.php?action=save_edited_file')); ?>">ذخیره</button>
                 <a href="<?php echo esc_url(site_url('/admin-panel')); ?>" class="btn btn-secondary">بازگشت به لیست فایل‌ها</a>
             </div>
             <div id="excelTable" class="handsontable-container" style="width: 100%; height: 600px; overflow-x: auto;"></div>
