@@ -90,7 +90,6 @@ function upload_new_excel_file() {
 }
 
 
-// ذخیره فایل اکسل ویرایش‌شده
 add_action('admin_post_save_edited_excel_file', 'save_edited_excel_file');
 function save_edited_excel_file() {
     if (!is_user_logged_in() || !current_user_can('manage_options')) {
@@ -108,20 +107,13 @@ function save_edited_excel_file() {
             $file_url = $movefile['url'];
             $file_path = $movefile['file'];
 
-            $post_update = wp_update_post(array(
+            wp_update_post(array(
                 'ID' => $file_id,
                 'post_content' => $file_url,
             ));
 
-            if (is_wp_error($post_update)) {
-                wp_die('Failed to update post: ' . $post_update->get_error_message());
-            }
-
-            $meta_update = update_post_meta($file_id, '_excel_file_path', $file_path);
-            if (!$meta_update) {
-                wp_die('Failed to update post meta.');
-            }
-
+            update_post_meta($file_id, '_excel_file_path', $file_path);
+            
             wp_redirect(site_url('/admin-panel'));
             exit;
         } else {
@@ -131,6 +123,7 @@ function save_edited_excel_file() {
         wp_die('Invalid request.');
     }
 }
+
 
 
 // نمایش فایل‌های اکسل در پنل مدیریت

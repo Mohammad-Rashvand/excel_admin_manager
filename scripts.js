@@ -25,22 +25,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const fetchExcelFile = async (url) => {
-        try {
-            const response = await fetch(url);
-            const data = await response.arrayBuffer();
-            const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
-            workbooks = workbook.SheetNames.map(sheetName => {
-                const sheet = workbook.Sheets[sheetName];
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-                headersArray.push(jsonData.shift());
-                return { name: sheetName, data: jsonData };
+    const fetchExcelFile = (url) => {
+        fetch(url)
+            .then(response => response.arrayBuffer())
+            .then(data => {
+                const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+                workbooks = workbook.SheetNames.map(sheetName => {
+                    const sheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    headersArray.push(jsonData.shift());
+                    return { name: sheetName, data: jsonData };
+                });
+                if (workbooks.length > 1) createSheetTabs();
+                loadSheet(0);
+            })
+            .catch(error => {
+                console.error('Error fetching the Excel file:', error);
             });
-            if (workbooks.length > 1) createSheetTabs();
-            loadSheet(0);
-        } catch (error) {
-            console.error('Error fetching the Excel file:', error);
-        }
     };
 
     const createSheetTabs = () => {
@@ -85,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const saveEditedFile = async () => {
+    const saveEditedFile = () => {
         document.getElementById('loading').style.display = 'block';
         const newWorkbook = XLSX.utils.book_new();
         workbooks.forEach((sheet, index) => {
@@ -98,28 +99,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const form = new FormData();
         form.append('file', blob);
         form.append('file_id', saveBtn.dataset.fileId);
-        try {
-            const response = await fetch(saveBtn.dataset.uploadUrl, { method: 'POST', body: form });
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            location.reload();
-        } catch (error) {
-            console.error('Error saving the edited file:', error);
-            document.getElementById('loading').style.display = 'none';
-        }
+
+        fetch(saveBtn.dataset.uploadUrl, {
+            method: 'POST',
+            body: form
+        })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error saving the edited file:', error);
+                document.getElementById('loading').style.display = 'none';
+            });
     };
 
     if (fileUrl) fetchExcelFile(fileUrl);
     if (saveBtn) saveBtn.addEventListener('click', saveEditedFile);
-
-    // اطمینان از اینکه پلاگین persianDatepicker بارگذاری شده است
-    if (typeof jQuery.fn.persianDatepicker !== 'undefined') {
-        jQuery('#searchDate').persianDatepicker({
-            format: 'YYYY/MM/DD',
-            initialValue: false
-        });
-    } else {
-        console.error('persianDatepicker is not loaded');
-    }
 
     const selectAllCheckbox = document.getElementById('selectAll');
     if (selectAllCheckbox) {
@@ -138,19 +134,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    window.bulkDelete = async () => {
+    window.bulkDelete = () => {
         const fileIds = Array.from(document.querySelectorAll('.fileCheckbox:checked')).map(checkbox => checkbox.value);
         if (!fileIds.length || !confirm('آیا مطمئن هستید که می‌خواهید فایل‌های انتخاب شده را حذف کنید؟')) return;
         const form = new FormData();
         form.append('action', 'bulk_delete_files');
         form.append('file_ids', JSON.stringify(fileIds));
-        try {
-            const response = await fetch(saveBtn.dataset.bulkDeleteUrl, { method: 'POST', body: form });
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            location.reload();
-        } catch (error) {
-            console.error('Error deleting files:', error);
-        }
+
+        fetch(saveBtn.dataset.bulkDeleteUrl, {
+            method: 'POST',
+            body: form
+        })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                location.reload();
+            })
+            .catch(error => {
+                console.error('Error deleting files:', error);
+            });
     };
 
     document.querySelectorAll('.duration').forEach(timer => {
@@ -195,27 +196,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const loginForm = document.getElementById('login-form');
     if (loginForm) {
-        loginForm.addEventListener('submit', async function (e) {
+        loginForm.addEventListener('submit', function (e) {
             e.preventDefault();
-            const form = new FormData();
+            const form = new FormData(loginForm);
             form.append('action', 'custom_login');
-            form.append('username', document.getElementById('username').value);
-            form.append('password', document.getElementById('password').value);
             form.append('security', customLogin.nonce);
-            await fetch(customLogin.ajax_url, { method: 'POST', body: form });
-            location.reload();
+            fetch(customLogin.ajax_url, {
+                method: 'POST',
+                body: form
+            })
+                .then(() => {
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error during login:', error);
+                });
         });
     }
 
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
-        logoutButton.addEventListener('click', async function (e) {
+        logoutButton.addEventListener('click', function (e) {
             e.preventDefault();
             const form = new FormData();
             form.append('action', 'custom_logout');
             form.append('security', customLogin.nonce);
-            await fetch(customLogin.ajax_url, { method: 'POST', body: form });
-            location.reload();
+            fetch(customLogin.ajax_url, {
+                method: 'POST',
+                body: form
+            })
+                .then(() => {
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error('Error during logout:', error);
+                });
         });
     }
 });
